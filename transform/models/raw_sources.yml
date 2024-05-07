@@ -1,0 +1,29 @@
+version: 2
+
+sources:
+  - name: billing
+    database: "{{ env_var('DBT_POSTGRES_DBNAME') }}"
+    schema: "{{ env_var('DBT_SOURCE_SCHEMA') }}"
+    tables:
+      - name: accounts
+      - name: services
+      - name: invoices
+      - name: v4_invoices
+      - name: balance_adjustments
+      - name: balance_types
+      - name: balances
+      - name: payments
+      - name: bills
+      - name: bill_lines
+      - name: payment_requests
+      - name: whitelist_users
+  - name: crm
+    database: "{{ env_var('DBT_POSTGRES_DBNAME') }}"
+    schema: "{{ env_var('DBT_SOURCE_SCHEMA') }}"
+    tables:
+      - name: customers
+  - name: billing_snapshots
+    database: "{{ env_var('DBT_POSTGRES_DBNAME') }}"
+    schema: "{{ env_var('DBT_SNAPSHOT_SCHEMA') }}"
+    tables:
+      - name: monthly_snapshot_balances

@@ -1,0 +1,1 @@
+{% macro convert_to_date_id(column_name) %}to_char({{ timestamp_to_local(column_name) }}, 'YYYY-MM-DD'){% endmacro %}

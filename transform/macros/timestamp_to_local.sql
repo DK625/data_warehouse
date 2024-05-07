@@ -1,0 +1,1 @@
+{% macro timestamp_to_local(column_name) %}({{ column_name }}::timestamp with time zone at time zone 'Asia/Ho_Chi_Minh'){% endmacro %}

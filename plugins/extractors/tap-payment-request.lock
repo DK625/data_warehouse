@@ -1,0 +1,41 @@
+{
+  "plugin_type": "extractors",
+  "name": "tap-payment-request",
+  "namespace": "tap_payment_request",
+  "label": "tap-payment-request",
+  "pip_url": "-e extract/tap-payment-request",
+  "executable": "tap-payment-request",
+  "capabilities": [
+    "catalog",
+    "discover",
+    "properties",
+    "state"
+  ],
+  "settings": [
+    {
+      "name": "mongodb_uri",
+      "kind": "password",
+      "sensitive": true
+    },
+    {
+      "name": "mongodb_database",
+      "kind": "password",
+      "sensitive": true
+    },
+    {
+      "name": "payment_request_collection",
+      "kind": "password",
+      "sensitive": true
+    },
+    {
+      "name": "destination_uri",
+      "kind": "password",
+      "sensitive": true
+    },
+    {
+      "name": "payment_request_destination_stream",
+      "kind": "password",
+      "sensitive": true
+    }
+  ]
+}

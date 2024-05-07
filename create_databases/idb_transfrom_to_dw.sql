@@ -10,3 +10,9 @@ SELECT KH.tenkh,
 FROM public.khachhang KH
 LEFT JOIN public.khachhangdulich KHDL ON KH.makh = KHDL.makh
 LEFT JOIN public.khachhangbuudien KHBD ON KH.makh = KHBD.makh
+
+INSERT INTO dw.store_dim (phone_number, city_id)
+SELECT CH.sodienthoai,
+CAST(regexp_replace(CH.mathanhpho, '\D', '', 'g') AS INTEGER)
+FROM public.cuahang CH
+

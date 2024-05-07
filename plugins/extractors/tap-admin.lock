@@ -1,0 +1,21 @@
+{
+  "plugin_type": "extractors",
+  "name": "tap-admin",
+  "namespace": "tap_admin",
+  "label": "tap-admin",
+  "pip_url": "-e extract/tap-admin",
+  "executable": "tap-admin",
+  "capabilities": [
+    "catalog",
+    "discover",
+    "properties",
+    "state"
+  ],
+  "settings": [
+    {
+      "name": "api_url",
+      "kind": "password",
+      "sensitive": true
+    }
+  ]
+}

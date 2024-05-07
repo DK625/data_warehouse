@@ -1,0 +1,14 @@
+{
+  "plugin_type": "extractors",
+  "name": "tap-billing",
+  "namespace": "tap_billing",
+  "label": "tap-billing",
+  "pip_url": "-e extract/tap-billing",
+  "executable": "tap-billing",
+  "settings": [
+    {
+      "name": "sqlalchemy_uri",
+      "kind": "string"
+    }
+  ]
+}

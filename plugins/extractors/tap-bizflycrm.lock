@@ -1,0 +1,31 @@
+{
+  "plugin_type": "extractors",
+  "name": "tap-bizflycrm",
+  "namespace": "tap_bizflycrm",
+  "label": "tap-bizflycrm",
+  "pip_url": "-e extract/tap-bizflycrm",
+  "executable": "tap-bizflycrm",
+  "capabilities": [
+    "catalog",
+    "discover",
+    "properties"
+  ],
+  "settings": [
+    {
+      "name": "api_base_url",
+      "kind": "string"
+    },
+    {
+      "name": "project_token",
+      "kind": "password"
+    },
+    {
+      "name": "api_key",
+      "kind": "password"
+    },
+    {
+      "name": "api_secret_key",
+      "kind": "password"
+    }
+  ]
+}

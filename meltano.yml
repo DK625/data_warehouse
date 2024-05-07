@@ -1,0 +1,178 @@
+version: 1
+default_environment: dev
+project_id: 05920aee-6f49-49e3-a570-9a51c26780a1
+environments:
+- name: dev
+- name: staging
+- name: prod
+plugins:
+  extractors:
+  - name: tap-bizflycrm
+    namespace: tap_bizflycrm
+    pip_url: -e extract/tap-bizflycrm
+    executable: tap-bizflycrm
+    capabilities:
+    - catalog
+    - discover
+    - properties
+    settings:
+    - name: api_base_url
+      kind: string
+    - name: project_token
+      kind: password
+    - name: api_key
+      kind: password
+    - name: api_secret_key
+      kind: password
+    config:
+      api_base_url: https://api.bizfly.vn
+  - name: tap-billing
+    namespace: tap_billing
+    pip_url: -e extract/tap-billing
+    executable: tap-billing
+    settings:
+    - name: sqlalchemy_uri
+      kind: string
+    - name: destination_sqlalchemy_uri
+      kind: string
+    - name: destination_table
+      kind: string
+  - name: tap-postgres
+    variant: transferwise
+    pip_url: pipelinewise-tap-postgres
+    config:
+      default_replication_method: INCREMENTAL
+    select:
+    - public-accounts.*
+    - public-services.*
+    - public-payments.*
+    - public-balance_adjustments.*
+    - public-invoices.*
+    - public-bills.*
+    - public-bill_lines.*
+    - public-v4_subscriptions.*
+    - public-plans.*
+    metadata:
+      public-accounts:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-services:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-payments:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-balance_adjustments:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-invoices:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-bills:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-bill_lines:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-v4_subscriptions:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-plans:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+  - name: tap-admin
+    namespace: tap_admin
+    pip_url: -e extract/tap-admin
+    executable: tap-admin
+    capabilities:
+    - catalog
+    - discover
+    - properties
+    - state
+    settings:
+    - name: api_url
+      kind: password
+  - name: tap-payment-request
+    namespace: tap_payment_request
+    pip_url: -e extract/tap-payment-request
+    executable: tap-payment-request
+    capabilities:
+    - catalog
+    - discover
+    - properties
+    - state
+    settings:
+    - name: mongodb_uri
+      kind: password
+    - name: mongodb_database
+      kind: password
+    - name: payment_request_collection
+      kind: password
+    - name: destination_uri
+      kind: password
+    - name: payment_request_destination_stream
+      kind: password
+  - name: tap-balance
+    inherit_from: tap-postgres
+    config:
+      default_replication_method: INCREMENTAL
+    select:
+      - public-balances.*
+      - public-balance_types.*
+    metadata:
+      public-balances:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+      public-balance_types:
+        replication-method: INCREMENTAL
+        replication-key: _updated
+  loaders:
+  - name: target-postgres
+    variant: transferwise
+    pip_url: pipelinewise-target-postgres
+    config:
+      hard_delete: true
+  orchestrators:
+  - name: airflow
+    variant: apache
+    pip_url: apache-airflow==2.1.2 psycopg2-binary --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.1.2/constraints-${MELTANO__PYTHON_VERSION}.txt
+  transformers:
+  - name: dbt-postgres
+    variant: dbt-labs
+    pip_url: dbt-core~=1.3.0 dbt-postgres~=1.3.0
+    commands:
+      daily_snapshot: snapshot --exclude monthly_snapshot_balances
+      daily_run: run --exclude report_customer_balances
+      snapshot_balances: snapshot -s monthly_balances
+      run_balance_model: run -s report_customer_balances+
+  files:
+  - name: files-airflow
+    variant: meltano
+    pip_url: git+https://github.com/meltano/files-airflow.git
+jobs:
+- name: elt-bizflycloud-revenue
+  tasks:
+  - tap-bizflycrm target-postgres
+  - tap-payment-request target-postgres
+  - tap-admin target-postgres
+  - tap-postgres target-postgres
+  - tap-billing target-postgres
+  - dbt-postgres:daily_snapshot
+  - dbt-postgres:daily_run
+- name: elt-monthly-snapshot-balances
+  tasks:
+  - tap-balance target-postgres
+  - dbt-postgres:snapshot_balances
+- name: elt-monthly-accountant-reports
+  tasks:
+  - dbt-postgres:run_balance_model
+schedules:
+- name: daily-bizflycloud-revenue-etl
+  interval: 0 19 * * *
+  job: elt-bizflycloud-revenue
+- name: monthly-snapshot-balances
+  interval: 0 17 L * *
+  job: elt-monthly-snapshot-balances
+- name: monthly-bizflycloud-accountant-report
+  interval: 0 23 L * *
+  job: elt-monthly-accountant-reports
