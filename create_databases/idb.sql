@@ -49,11 +49,12 @@ CREATE TABLE MatHang (
 
 -- Tạo bảng Mặt hàng được lưu trữ
 CREATE TABLE MatHangDuocLuuTru (
+	MaMHDLT SERIAL,
     MaCuaHang CHAR(6) REFERENCES CuaHang(MaCuaHang),
     MaMH CHAR(6) REFERENCES MatHang(MaMH),
     SoLuongTrongKho INTEGER,
     ThoiGian DATE,
-    PRIMARY KEY (MaCuaHang, MaMH)
+    PRIMARY KEY (MaMHDLT, MaCuaHang, MaMH)
 );
 
 -- Tạo bảng Đơn đặt hàng
